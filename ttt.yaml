@@ -93,6 +93,12 @@ paths:
 components:
   schemas:
     Game:
+      required:
+        - id
+        - playerOne
+        - playerTwo
+        - board
+        - message
       properties:
         id:
           description: id
@@ -103,13 +109,16 @@ components:
         playerTwo:
           description: playerTwo
           type: string
-        winner:
-          description: winner
-          type: string
         board:
           description: board
           type: array
           items: {  }
+        message:
+          description: message
+          type: string
+        winner:
+          description: winner
+          type: string
         playerToMove:
           description: playerToMove
           type: string
@@ -120,13 +129,14 @@ components:
           readOnly: true
       type: object
     Move:
+      required:
+        - player
+        - boardPosition
       properties:
         player:
           description: player
           type: string
-          required: true
         boardPosition:
           description: boardPosition
           type: integer
-          required: true
       type: object

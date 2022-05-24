@@ -5,15 +5,15 @@ public type GamesBody record {
 
 public type Game record {
     # id
-    int id?;
+    int id;
     # playerOne
-    string playerOne?;
+    string playerOne;
     # playerTwo
-    string playerTwo?;
+    string playerTwo;
     # winner
     string winner?;
     # board
-    anydata[] board?;
+    anydata[] board;
     # playerToMove
     string playerToMove?;
     # createdAt
@@ -21,14 +21,8 @@ public type Game record {
 };
 
 public type Move record {
-    # id
-    string id?;
     # player
     string player?;
-    # gameId
-    string gameId?;
     # boardPosition
     int boardPosition?;
-    # createdAt
-    string createdAt?;
 };

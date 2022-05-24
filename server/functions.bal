@@ -36,7 +36,12 @@ function makeMove(Game game, Move move) returns Game|error {
     io:println("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
 
     // Assume success for now
-    int boardPos = move.boardPosition
+    if (move.boardPosition is ()) {
+        return error("Board position cannot be empty in a Move");
+    }
+    else {
+        int boardPos = move.boardPosition ?: -1;
+    }
 
     return game;
 }
