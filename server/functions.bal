@@ -3,7 +3,8 @@ import ballerina/lang.value;
 import ballerina/time;
 
 int nextId = 1;
-table<Game> key(id) games = table [
+//table<Game> games = table [  // table
+Game[] games = [   // array
     {id:0, playerOne:"Fred", playerTwo:"Barney", 
         board:[" ", " ", " ", " ", " ", " ", " ", " ", " "],
         playerToMove:"Fred", createdAt: time:utcToString(time:utcNow()) }
@@ -26,14 +27,16 @@ public function createGame(string p1, string p2) returns Game {
     Game game = { id:gid, playerOne:p1, playerTwo:p2,
         board:[" ", " ", " ", " ", " ", " ", " ", " ", " " ],
         playerToMove: p1, createdAt: time:utcToString(time:utcNow()) };
-    games.add(game);
+    //games.add(game); // table
+    games.push(game); // array
 
     return game;
 }
 function makeMove(Game game, Move move) returns Game|error {
     io:println("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
 
-    
+    // Assume success for now
+    int boardPos = move.boardPosition
 
     return game;
 }

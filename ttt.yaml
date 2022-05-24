@@ -64,7 +64,7 @@ paths:
         '404':
           description: 'Can not find Game with id {id}'
   '/games/{id}/move':
-    patch:
+    post:
       summary: 'Make a move on game'
       parameters:
         -
@@ -106,16 +106,13 @@ components:
         winner:
           description: winner
           type: string
-          readOnly: true
         board:
           description: board
           type: array
           items: {  }
-          readOnly: true
         playerToMove:
           description: playerToMove
           type: string
-          readOnly: true
         createdAt:
           description: createdAt
           type: string
@@ -124,21 +121,12 @@ components:
       type: object
     Move:
       properties:
-        id:
-          description: id
-          type: string
         player:
           description: player
           type: string
-        gameId:
-          description: gameId
-          type: string
+          required: true
         boardPosition:
           description: boardPosition
           type: integer
-        createdAt:
-          description: createdAt
-          type: string
-          format: date-time
-          readOnly: true
+          required: true
       type: object
