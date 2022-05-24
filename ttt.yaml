@@ -1,0 +1,144 @@
+openapi: 3.0.0
+info:
+  title: 'Tic Tac Toe API'
+  contact:
+    email: ted@tedneward.com
+  version: '1.0'
+paths:
+  /games:
+    get:
+      summary: 'Get a list of all the games'
+      responses:
+        '200':
+          description: 'Show game'
+          content:
+            application/json:
+              schema:
+                type: 'array'
+                items:
+                  $ref: '#/components/schemas/Game'
+    post:
+      summary: 'Create a new game'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerOne:
+                  type: string
+                playerTwo:
+                  type: string
+              example:
+                playerOne: Fred
+                playerTwo: Barney
+      responses:
+        '201':
+          description: 'A new game was created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: 'Something was not correct about the Game you attempted to create'
+        '405':
+          description: 'Winner can not been set, Player to move can not been set'
+  '/games/{id}':
+    get:
+      summary: 'Get a game by id'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'ID of game to fetch'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Show game'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          description: 'Can not find Game with id {id}'
+  '/games/{id}/move':
+    patch:
+      summary: 'Make a move on game'
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'ID of game to update'
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Move'
+      responses:
+        '200':
+          description: 'The board of the game was updated'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          description: 'Can not find Game with id {id}'
+        '400':
+          description: 'The move is illegal.'
+components:
+  schemas:
+    Game:
+      properties:
+        id:
+          description: id
+          type: integer
+        playerOne:
+          description: playerOne
+          type: string
+        playerTwo:
+          description: playerTwo
+          type: string
+        winner:
+          description: winner
+          type: string
+          readOnly: true
+        board:
+          description: board
+          type: array
+          items: {  }
+          readOnly: true
+        playerToMove:
+          description: playerToMove
+          type: string
+          readOnly: true
+        createdAt:
+          description: createdAt
+          type: string
+          format: date-time
+          readOnly: true
+      type: object
+    Move:
+      properties:
+        id:
+          description: id
+          type: string
+        player:
+          description: player
+          type: string
+        gameId:
+          description: gameId
+          type: string
+        boardPosition:
+          description: boardPosition
+          type: integer
+        createdAt:
+          description: createdAt
+          type: string
+          format: date-time
+          readOnly: true
+      type: object
