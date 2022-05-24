@@ -5,13 +5,13 @@ public type GamesBody record {
 
 public type Game record {
     # id
-    int id?;
+    int id;
     # playerOne
-    string playerOne?;
+    string playerOne;
     # playerTwo
-    string playerTwo?;
+    string playerTwo;
     # winner
-    string winner?;
+    string winner;
     # board
     anydata[] board?;
     # playerToMove
