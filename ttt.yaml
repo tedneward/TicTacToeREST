@@ -93,6 +93,11 @@ paths:
 components:
   schemas:
     Game:
+      required:
+        - id
+        - playerOne
+        - playerTwo
+        - winner
       properties:
         id:
           description: id
