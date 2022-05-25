@@ -24,6 +24,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - playerOne
+                - playerTwo
               properties:
                 playerOne:
                   type: string
@@ -103,6 +106,7 @@ components:
         id:
           description: id
           type: integer
+          readOnly: true
         playerOne:
           description: playerOne
           type: string

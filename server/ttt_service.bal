@@ -14,14 +14,14 @@ service / on ep0 {
     resource function get games/[int  id]() 
         returns Game|http:NotFound 
     {
-        io:println("GET /games/{" + int:toHexString(id) + "}");
+        io:println("GET /games/{" + value:toString(id) + "}");
 
-        Game|error res = getGame(id);
-        if (res is error) {
+        Game? game = getGame(id);
+        if (game is ()) {
             return <http:NotFound>{};
         }
         else {
-            return res;
+            return game;
         }
     }
     resource function post games(@http:Payload GamesBody payload) 
@@ -29,25 +29,23 @@ service / on ep0 {
     {
         io:println("POST /games " + value:toBalString(payload));
 
-        Game game = createGame(payload.playerOne ?: "", payload.playerTwo ?: "");
+        Game game = createGame(payload.playerOne, payload.playerTwo);
 
         return <http:Created>{ body:game };
     }
     resource function post games/[int  id]/move(@http:Payload Move payload)
         returns Game|http:NotFound|http:BadRequest
     {
-        io:println("POST /games/" + int:toHexString(id) + "/move " + value:toBalString(payload));
+        io:println("POST /games/" + value:toString(id) + "/move " + value:toBalString(payload));
 
-        Game|error game = getGame(id);
-        if (game is error) {
-            http:NotFound notFound = { };
-            return notFound;
+        Game? game = getGame(id);
+        if (game is ()) {
+            return <http:NotFound> { body:"Game " + value:toString(id) + " is not in this service's database" };
         }
         else {
             Game|error result = makeMove(game, payload);
             if (result is error) {
-                http:BadRequest badRequest = { };
-                return badRequest;
+                return <http:BadRequest> { body:"That move is illegal:" + error:message(result) };
             }
             else {
                 return result;

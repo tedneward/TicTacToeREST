@@ -1,19 +1,21 @@
 public type GamesBody record {
-    string playerOne?;
-    string playerTwo?;
+    string playerOne;
+    string playerTwo;
 };
 
 public type Game record {
     # id
-    int id;
+    readonly int id;
     # playerOne
     string playerOne;
     # playerTwo
     string playerTwo;
-    # winner
-    string winner?;
     # board
     anydata[] board;
+    # message
+    string message;
+    # winner
+    string winner?;
     # playerToMove
     string playerToMove?;
     # createdAt
@@ -22,7 +24,7 @@ public type Game record {
 
 public type Move record {
     # player
-    string player?;
+    string player;
     # boardPosition
-    int boardPosition?;
+    int boardPosition;
 };
