@@ -1,5 +1,14 @@
 [package]
-distribution = "2201.0.3"
+distribution = "2201.1.1"
+name="tictactoe"
+org="tedneward"
+version="0.1.0"
 
 [build-options]
 observabilityIncluded = true
+
+[[platform.java11.dependency]]
+groupId = "com.h2database"
+artifactId = "h2"
+version = "2.1.214"
+#path="path.to.h2.jar" would work here as well
