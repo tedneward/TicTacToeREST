@@ -11,7 +11,7 @@ public type Game record {
     # playerTwo
     string playerTwo;
     # board
-    string board;
+    string[] board;
     # message
     string message;
     # winner
