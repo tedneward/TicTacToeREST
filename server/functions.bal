@@ -33,7 +33,7 @@ class GameDB {
 
     function insert(string playerOne, string playerTwo) returns int|error {
         io:println("GameDB::insert");
-        json board = [ "", "", "", "", "", "", "", "", "" ];
+        string[] board = [ "", "", "", "", "", "", "", "", "" ];
         time:Utc createdAt = time:utcNow();
         sql:ParameterizedQuery query = 
             `INSERT INTO Games (playerOne, playerTwo, board, playerToMove, createdAt) 
@@ -75,10 +75,9 @@ class GameDB {
     }
 
     function update(Game game) returns error? {
-        json board = {"board": game.board.toJsonString()};
-        io:println(board);
+        io:println(game.board);
         sql:ParameterizedQuery query = `UPDATE Games SET playerToMove=${game.playerToMove}, 
-             board = ${board.toString()} WHERE id = ${game.id}`;
+             board = ${game.board} WHERE id = ${game.id}`;
         io:print("SQL:"); io:println(query);
         _ = check self.jdbcClient->execute(query);
      }
@@ -114,12 +113,12 @@ public function getGame(int id) returns Game|error {
 public function createGame(string p1, string p2) returns Game|error {
     io:println("createGame(p1:" + p1 + ",p2:" + p2 + ")");
 
-    // p1 is X and therefore always first to move; TODO randomize this
+    // p1 is X and board always first to move; TODO randomize this
 
     int id = check gamedb.insert(p1, p2);
     return check gamedb.game(id);
 }
-function checkWinner(Game game, string player) returns boolean {
+function checkWinner(Game game, string player) returns boolean|error {
     io:println("Checking for winner in game " + value:toString(game.id) + " for player " + player);
 
     var winPatterns = [
@@ -136,12 +135,13 @@ function checkWinner(Game game, string player) returns boolean {
         [2, 4, 6]
     ];
 
+    string[] board = check game.board.fromJsonStringWithType();
     foreach int[] pattern in winPatterns {
         io:print("Checking pattern " + value:toBalString(pattern) + ": ");
 
         boolean win = true;
         pattern.forEach(function (int pos) {
-            if (game.board[pos] != player) {
+            if (board[pos] != player) {
                 win = false;
             }
         });
@@ -154,11 +154,12 @@ function checkWinner(Game game, string player) returns boolean {
 
     return false;
 }
-function checkCats(Game game) returns boolean { 
+function checkCats(Game game) returns boolean|error { 
     io:println("Checking for cats game in game " + value:toString(game.id));
 
     // Brute-force method: if any space is open, it's not cats yet
-    var openSqs = game.board.filter(function (anydata sq) returns boolean { return (value:toString(sq) == ""); });
+    string[] board = check game.board.fromJsonStringWithType();
+    var openSqs = board.filter(function (anydata sq) returns boolean { return (value:toString(sq) == ""); });
     io:println(value:toString(openSqs.length()) + " squares are open");
     return openSqs.length() == 0;
 
@@ -182,13 +183,15 @@ public function makeMove(Game game, Move move) returns Game|error {
         return error("Illegal move: Not your turn!");
     }
 
+    string[] board = check game.board.fromJsonStringWithType();
     // That position cannot already be occupied
-    if (game.board[boardPos] != "") {
+    if (board[boardPos] != "") {
         return error("Illegal move: Occupied space!");
     }
 
     // Put the player in that given square
-    game.board[boardPos] = move.player;
+    board[boardPos] = move.player;
+    game.board = board.toJsonString();
     // Update the player moving
     game.playerToMove = (game.playerOne == move.player ? game.playerTwo : game.playerOne);
     // Update the most-recent message
@@ -196,15 +199,15 @@ public function makeMove(Game game, Move move) returns Game|error {
 
     ///////////////////////
     // Check for winner
-    if (checkWinner(game, game.playerOne)) {
+    if (check checkWinner(game, game.playerOne)) {
         game.winner = game.playerOne;
         game.message += "; " + game.playerOne + " WINS!";
     }
-    else if (checkWinner(game, game.playerTwo)) {
+    else if (check checkWinner(game, game.playerTwo)) {
         game.winner = game.playerTwo;
         game.message += "; " + game.playerTwo + " WINS!";
     }
-    else if (checkCats(game)) {
+    else if (check checkCats(game)) {
         game.winner = "(NOBODY)";
         game.message += "; cats game (draw)!";
     }
