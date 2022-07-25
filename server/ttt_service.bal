@@ -1,6 +1,5 @@
 import ballerina/http;
 import ballerina/log;
-import ballerina/lang.value;
 
 listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
@@ -20,7 +19,7 @@ service / on ep0 {
     }
     resource function get games/[int  id]() returns Game|http:NotFound 
     {
-        log:printInfo("GET /games/{" + value:toString(id) + "}");
+        log:printInfo(string `GET /games/${id}`);
 
         Game?|error game = getGame(id);
         if (game is ()) {
@@ -38,7 +37,7 @@ service / on ep0 {
     }
     resource function post games(@http:Payload GamesBody payload) returns http:Created|http:BadRequest|http:MethodNotAllowed
     {
-        log:printInfo("POST /games " + value:toBalString(payload) + ": ");
+        log:printInfo(string `POST /games ${payload.toBalString()}: `);
 
         Game|error game = createGame(payload.playerOne, payload.playerTwo);
         if game is error {
@@ -46,29 +45,29 @@ service / on ep0 {
             return <http:BadRequest>{};
         }
         else {
-            log:printInfo("Created: " + game.toString());
+            log:printInfo(string `Created: ${game.toString()}`);
             return <http:Created>{ body:game };
         }
     }
     resource function post games/[int  id]/move(@http:Payload Move payload) returns Game|http:NotFound|http:BadRequest
     {
-        log:printInfo("POST /games/" + value:toString(id) + "/move " + value:toBalString(payload) + ": ");
+        log:printInfo(string `POST /games/${id}/move ${payload.toBalString()}: `);
 
         Game?|error game = getGame(id);
         if (game is ()) {
             log:printWarn("    Error: NotFound");
-            return <http:NotFound> { body:"Game " + value:toString(id) + " is not in this service's database" };
+            return <http:NotFound> { body: string `Game ${id} is not in this service's database` };
         }
         else if (game is error) {
             log:printError("    Error: BadRequest", game);
             return <http:BadRequest> {};
         }
         else {
-            log:printInfo("    Checking move; game " + game.toString());
+            log:printInfo(string `Checking move; game ${game.toString()}`);
             Game|error result = makeMove(game, payload);
             if (result is error) {
-                log:printError("    Error: Illegal move: " + result.toString(), result);
-                return <http:BadRequest> { body:"That move is illegal:" + result.message()};
+                log:printError(string `    Error: Illegal move: ${result.toBalString()}`, result);
+                return <http:BadRequest> { body: string `That move is illegal:${result.toBalString()}` };
             }
             else {
                 log:printInfo("    Moved", game=game);

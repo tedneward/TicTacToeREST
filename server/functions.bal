@@ -39,14 +39,14 @@ class GameDB {
             `INSERT INTO Games (playerOne, playerTwo, board, playerToMove, createdAt) 
              VALUES (${playerOne},${playerTwo}, ${board}, ${playerOne}, ${createdAt})`;
         sql:ExecutionResult result = check self.jdbcClient->execute(query);
-        log:printInfo("SQL RESULT: " + result.toString());
+        log:printInfo(string `SQL RESULT ${result.toBalString()}`);
         return <int>result.lastInsertId;
     }
 
     function game(int id) returns Game|error {
-        log:printInfo("GameDB::game(" + id.toString() + ")");
-        Game|error result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
-        log:printError("result: ${result)");
+        log:printInfo(string `GameDB::game(${id.toString()})`);
+        Game result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
+        log:printError(string `result: ${result.toBalString()}`);
         return result;
     }
 
@@ -60,14 +60,14 @@ class GameDB {
         stream<Game,error?> results = self.jdbcClient->query(query);
         check from Game game in results
             do {
-                log:printInfo("Found " + game.toString());
+                log:printInfo(string `Found ${game.toString()}`);
                 games.push(game);
             };
         return games;
     }
 
     function update(Game game) returns error? {
-        log:printInfo("GameDB::update(" + game.toString() + ")");
+        log:printInfo(string `GameDB::update(${game.toString()}`);
         sql:ParameterizedQuery query =
             `UPDATE Games SET playerToMove=${game.playerToMove},
              board = ${game.board} WHERE id = ${game.id}`;
@@ -75,7 +75,7 @@ class GameDB {
      }
 
     function delete(int id) returns error? {
-        log:printInfo("GameDB::delete(" + id.toString() + ")");
+        log:printInfo(string `GameDB::delete(${id.toString()})`);
         _ = check self.jdbcClient->execute(`DELETE FROM Games WHERE id = ${id}`);
     }
 
@@ -98,13 +98,13 @@ public function getGames() returns Game[]|error {
     return check gamedb.retrieve();
 }
 public function getGame(int id) returns Game|error {
-    log:printInfo("getGame(id:" + value:toString(id) + "): ");
+    log:printInfo(string `getGame(id:${value:toString(id)}): `);
     Game game = check gamedb.game(id);
-    log:printInfo(" returns " + game.toString());
+    log:printInfo(string ` returns ${game.toString()}`);
     return game;
 }
 public function createGame(string p1, string p2) returns Game|error {
-    log:printInfo("createGame(p1:" + p1 + ",p2:" + p2 + ")");
+    log:printInfo(string `createGame(p1: ${p1}, p2: ${p2})`);
 
     // p1 is X and board always first to move; TODO randomize this
 
@@ -114,12 +114,12 @@ public function createGame(string p1, string p2) returns Game|error {
         log:printError(result.toString());
     }
     else {
-        log:printInfo("returns " + result.toString());
+        log:printInfo(string `returns ${result.toString()}`);
     }
     return result;
 }
 function checkWinner(Game game, string player) returns boolean {
-    log:printInfo("Checking for winner in game " + value:toString(game.id) + " for player " + player);
+    log:printInfo(string `Checking for winner in game ${value:toString(game.id)} for player ${player}`);
 
     var winPatterns = [
         // Down
@@ -136,7 +136,7 @@ function checkWinner(Game game, string player) returns boolean {
     ];
 
     foreach int[] pattern in winPatterns {
-        log:printInfo("Checking pattern " + value:toBalString(pattern) + ": ");
+        log:printInfo(string `Checking pattern ${value:toBalString(pattern)}: `);
 
         boolean win = true;
         pattern.forEach(function (int pos) {
@@ -154,7 +154,7 @@ function checkWinner(Game game, string player) returns boolean {
     return false;
 }
 function checkCats(Game game) returns boolean {
-    log:printInfo("Checking for cats game in game " + value:toString(game.id));
+    log:printInfo(string `Checking for cats game in game ${value:toString(game.id)}`);
 
     // Brute-force method: if any space is open, it's not cats yet
     var openSqs = game.board.filter(function (anydata sq) returns boolean { return (value:toString(sq) == ""); });
@@ -165,7 +165,7 @@ function checkCats(Game game) returns boolean {
     // so the players don't have to go through the motions
 }
 public function makeMove(Game game, Move move) returns Game|error {
-    log:printInfo("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
+    log:printInfo(string `makeMove(game:${value:toBalString(game)}, move:${value:toBalString(move)})`);
 
     ///////////////////////
     // Process the move
@@ -173,7 +173,7 @@ public function makeMove(Game game, Move move) returns Game|error {
 
     // Game must not be over
     if (game.winner != () ) {
-        return error("Game is completed; " + (game.winner ?: "") + " won.");
+        return error(string `Game is completed; ${(game.winner ?: "")}`);
     }
 
     // It must be this player's turn
@@ -208,7 +208,7 @@ public function makeMove(Game game, Move move) returns Game|error {
         game.message += "; cats game (draw)!";
     }
 
-    log:printInfo("Updating game: " + game.toString());
+    log:printInfo(string `Updating game: ${game.toString()}`);
     _ = check gamedb.update(game);
     return game;
 }
