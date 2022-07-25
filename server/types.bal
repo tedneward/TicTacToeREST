@@ -1,3 +1,5 @@
+import ballerina/http;
+
 public type GamesBody record {
     string playerOne;
     string playerTwo;
@@ -28,3 +30,10 @@ public type Move record {
     # boardPosition
     int boardPosition;
 };
+
+# The response for successful game creation
+public type GameCreated record {|
+    *http:Created;
+    # response body
+    GamesBody body;
+|};
