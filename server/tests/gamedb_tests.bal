@@ -1,55 +1,68 @@
 //import ballerina/log;
 import ballerina/test;
 
+GameDB db = check new GameDB("target/gamedb");
+
+@test:BeforeEach
+function newGamedb() returns error? {
+    db = check new GameDB("target/gamedb");
+}
+
+@test:AfterEach
+function cleanupGamedb() returns error? {
+    check db.drop();
+    check db.close();
+}
+
 @test:Config {}
 function testConstruction() returns error? {
-    GameDB gamedb = check new GameDB("target/testConstruction");
-
-    Game[] games = check gamedb.retrieve();
+    Game[] games = check db.retrieve();
     test:assertEquals(games, [], msg="Games not empty: " + games.toString());
-
-    check gamedb.close();
 }
 
 @test:Config {}
 function testCreateAndRetrieveNewGame() returns error? {
-    GameDB gamedb = check new GameDB("target/testCreateAndRetrieveNewGame");
+    int gameID = check db.insert("Fred", "Barney");
 
-    int gameID = check gamedb.insert("Fred", "Barney");
-
-    Game[] games = check gamedb.retrieve();
+    Game[] games = check db.retrieve();
     test:assertTrue(games.length() > 0, msg="Games empty: " + games.toString());
 
-    Game game = check gamedb.game(gameID);
+    Game game = check db.game(gameID);
     test:assertEquals(game.playerOne, "Fred");
     test:assertEquals(game.playerTwo, "Barney");
     test:assertEquals(game.board, "[\"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
     test:assertEquals(game.playerToMove, "Fred");
-
-    check gamedb.close();
 }
 
 @test:Config {}
-function testMove() returns error? {
-    GameDB gamedb = check new GameDB("target/testCreateAndRetrieveNewGame");
+function updateAGame() returns error? {
+    int gameID = check db.insert("Fred", "Barney");
 
-    int gameID = check gamedb.insert("Fred", "Barney");
-
-    Game[] games = check gamedb.retrieve();
+    Game[] games = check db.retrieve();
     test:assertTrue(games.length() > 0, msg="Games empty: " + games.toString());
 
-    Game game = check gamedb.game(gameID);
+    Game game = check db.game(gameID);
 
     game.board = "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
     game.playerToMove = "Barney";
 
-    check gamedb.update(game);
+    check db.update(game);
 
-    game = check gamedb.game(gameID);
+    game = check db.game(gameID);
     test:assertEquals(game.playerOne, "Fred");
     test:assertEquals(game.playerTwo, "Barney");
     test:assertEquals(game.board, "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
     test:assertEquals(game.playerToMove, "Barney");
-
-    check gamedb.close();
 }
+
+@test:Config {}
+function createAndDeleteAGame() returns error? {
+    int gameID = check db.insert("Fred", "Barney");
+    Game game = check db.game(gameID);
+
+    check db.delete(gameID);
+
+    Game[] games = check db.retrieve("WHERE id = " + gameID.toString());
+    test:assertEquals(games, []);
+}
+
