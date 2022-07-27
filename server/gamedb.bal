@@ -1,6 +1,7 @@
 import ballerina/log;
 import ballerina/sql;
 import ballerina/time;
+import ballerina/lang.value;
 import ballerinax/java.jdbc;
 
 isolated class GameDB {
@@ -37,8 +38,8 @@ isolated class GameDB {
 
   isolated  function game(int id) returns Game|error {
         log:printInfo("GameDB::game(" + id.toString() + ")");
-        Game|error result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
-        log:printError("result: ${result)");
+        Game result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
+        log:printDebug("result: " + value:toBalString(result));
         return result;
     }
 
