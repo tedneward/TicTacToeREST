@@ -56,7 +56,7 @@ isolated class GameDB {
         return games is Game[] ? games : [];
     }
 
-    function update(Game game) returns error? {
+    isolated function update(Game game) returns error? {
         log:printInfo("GameDB::update(" + game.toString() + ")");
         sql:ParameterizedQuery query =
             `UPDATE Games SET playerToMove=${game.playerToMove}, 
