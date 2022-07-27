@@ -27,7 +27,6 @@ function testCreateAndRetrieveNewGame() returns error? {
     Game[] games = check db.retrieve();
     test:assertTrue(games.length() > 0, msg="Games empty: " + games.toString());
 
-    //string emptyBoard = "[\"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
     string[] emptyBoard = ["", "", "", "", "", "", "", "", ""];
 
     Game game = check db.game(gameID);
@@ -46,7 +45,6 @@ function updateAGame() returns error? {
 
     Game game = check db.game(gameID);
 
-    //game.board = "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
     game.board[0] = "Fred";
     game.playerToMove = "Barney";
 
@@ -55,7 +53,6 @@ function updateAGame() returns error? {
     game = check db.game(gameID);
     test:assertEquals(game.playerOne, "Fred");
     test:assertEquals(game.playerTwo, "Barney");
-    //test:assertEquals(game.board, "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
     test:assertEquals(game.board, ["Fred", "", "", "", "", "", "", "", ""]);
     test:assertEquals(game.playerToMove, "Barney");
 }
