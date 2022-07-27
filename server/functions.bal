@@ -58,10 +58,9 @@ function checkWinner(Game game, string player) returns boolean|error {
                 win = false;
             }
         });
-        log:printDebug(win.toString());
 
+        log:printDebug(win.toString());
         if (win) {
-            log:printInfo(player + "WIN!");
             return true;
         }
     }
