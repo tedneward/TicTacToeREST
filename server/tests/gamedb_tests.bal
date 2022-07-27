@@ -27,10 +27,13 @@ function testCreateAndRetrieveNewGame() returns error? {
     Game[] games = check db.retrieve();
     test:assertTrue(games.length() > 0, msg="Games empty: " + games.toString());
 
+    //string emptyBoard = "[\"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
+    string[] emptyBoard = ["", "", "", "", "", "", "", "", ""];
+
     Game game = check db.game(gameID);
     test:assertEquals(game.playerOne, "Fred");
     test:assertEquals(game.playerTwo, "Barney");
-    test:assertEquals(game.board, "[\"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
+    test:assertEquals(game.board, emptyBoard);
     test:assertEquals(game.playerToMove, "Fred");
 }
 
@@ -43,7 +46,8 @@ function updateAGame() returns error? {
 
     Game game = check db.game(gameID);
 
-    game.board = "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
+    //game.board = "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]";
+    game.board[0] = "Fred";
     game.playerToMove = "Barney";
 
     check db.update(game);
@@ -51,7 +55,8 @@ function updateAGame() returns error? {
     game = check db.game(gameID);
     test:assertEquals(game.playerOne, "Fred");
     test:assertEquals(game.playerTwo, "Barney");
-    test:assertEquals(game.board, "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
+    //test:assertEquals(game.board, "[\"Fred\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"]");
+    test:assertEquals(game.board, ["Fred", "", "", "", "", "", "", "", ""]);
     test:assertEquals(game.playerToMove, "Barney");
 }
 
@@ -59,6 +64,7 @@ function updateAGame() returns error? {
 function createAndDeleteAGame() returns error? {
     int gameID = check db.insert("Fred", "Barney");
     Game game = check db.game(gameID);
+    test:assertEquals(game.id, gameID);
 
     check db.delete(gameID);
 

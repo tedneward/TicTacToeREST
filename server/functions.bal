@@ -48,32 +48,34 @@ function checkWinner(Game game, string player) returns boolean|error {
         [2, 4, 6]
     ];
 
-    string[] board = check game.board.fromJsonStringWithType();
+    //string[] board = check game.board.fromJsonStringWithType();
     foreach int[] pattern in winPatterns {
-        log:printInfo("Checking pattern " + value:toBalString(pattern) + ": ");
+        log:printDebug("Checking pattern " + value:toBalString(pattern) + ": ");
 
         boolean win = true;
         pattern.forEach(function (int pos) {
-            if (board[pos] != player) {
+            if (game.board[pos] != player) {
                 win = false;
             }
         });
-        log:printInfo(win.toString());
+        log:printDebug(win.toString());
 
         if (win) {
+            log:printInfo(player + "WIN!");
             return true;
         }
     }
 
+    log:printInfo("No winner");
     return false;
 }
 function checkCats(Game game) returns boolean|error { 
     log:printInfo("Checking for cats game in game " + value:toString(game.id));
 
     // Brute-force method: if any space is open, it's not cats yet
-    string[] board = check game.board.fromJsonStringWithType();
-    var openSqs = board.filter(function (anydata sq) returns boolean { return (value:toString(sq) == ""); });
-    log:printInfo(value:toString(openSqs.length()) + " squares are open");
+    //string[] board = check game.board.fromJsonStringWithType();
+    var openSqs = game.board.filter(function (anydata sq) returns boolean { return (value:toString(sq) == ""); });
+    log:printDebug(value:toString(openSqs.length()) + " squares are open");
     return openSqs.length() == 0;
 
     // TODO: optimize this to detect when there's an open square on an unwinnable game
@@ -96,15 +98,15 @@ public function makeMove(Game game, Move move) returns Game|error {
         return error("Illegal move: Not your turn!");
     }
 
-    string[] board = check game.board.fromJsonStringWithType();
+    //string[] board = check game.board.fromJsonStringWithType();
     // That position cannot already be occupied
-    if (board[boardPos] != "") {
+    if (game.board[boardPos] != "") {
         return error("Illegal move: Occupied space!");
     }
 
     // Put the player in that given square
-    board[boardPos] = move.player;
-    game.board = board.toJsonString();
+    game.board[boardPos] = move.player;
+    //game.board = board.toJsonString();
     // Update the player moving
     game.playerToMove = (game.playerOne == move.player ? game.playerTwo : game.playerOne);
     // Update the most-recent message
