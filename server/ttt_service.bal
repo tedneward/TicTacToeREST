@@ -5,7 +5,7 @@ import ballerina/log;
 listener http:Listener ep0 = new (9090);
 
 service / on ep0 {
-    isolated resource function get games() returns Game[] {
+    resource function get games() returns Game[] {
         log:printInfo("GET /games: ");
         Game[]|error games = getGames();
         if games is error {
@@ -16,7 +16,7 @@ service / on ep0 {
         return games;
     }
 
-    isolated resource function get games/[int id]() returns Game|http:NotFound {
+    resource function get games/[int id]() returns Game|http:NotFound {
         log:printInfo("GET /games/{" + value:toString(id) + "}");
 
         Game|error game = getGame(id);

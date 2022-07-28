@@ -6,16 +6,18 @@ configurable string password = "admin";
 
 final GameDB gamedb = check new GameDB("games");
 
-isolated function getGames() returns Game[]|error {
+function getGames() returns Game[]|error {
     log:printInfo("getGames()");
     return check gamedb.retrieve();
 }
-isolated function getGame(int id) returns Game|error {
+
+function getGame(int id) returns Game|error {
     log:printInfo("getGame(id:" + value:toString(id) + "): ");
     Game game = check gamedb.game(id);
     log:printInfo(" returns " + game.toString());
     return game;
 }
+
 function createGame(string p1, string p2) returns Game|error {
     log:printInfo("createGame(p1:" + p1 + ",p2:" + p2 + ")");
 
@@ -25,34 +27,39 @@ function createGame(string p1, string p2) returns Game|error {
     log:printInfo("returns " + result.toString());
     return result;
 }
-isolated function checkWinner(Game game, string player) returns boolean|error {
+
+function checkWinner(Game game, string player) returns boolean|error {
     log:printInfo("Checking for winner in game " + value:toString(game.id) + " for player " + player);
 
-        boolean win = true;
+    boolean win = true;
 
-        check from int[] pattern in WIN_PATTERNS
-            from int pos in pattern
-            do {
-                log:printDebug("Checking pattern " + value:toBalString(pattern) + ": ");
-                if game.board[pos] != player {
-                    win = false;
-                }
-            };
-        return win;
+    check from int[] pattern in WIN_PATTERNS
+        from int pos in pattern
+        do {
+            log:printDebug("Checking pattern " + value:toBalString(pattern) + ": ");
+            if game.board[pos] != player {
+                win = false;
+            }
+        };
+    return win;
 }
-isolated function checkCats(Game game) returns boolean|error { 
+
+function checkCats(Game game) returns boolean|error {
     log:printInfo("Checking for cats game in game " + value:toString(game.id));
 
     // Brute-force method: if any space is open, it's not cats yet
     //string[] board = check game.board.fromJsonStringWithType();
-    string[] openSqs = game.board.filter(isolated function (string sq) returns boolean { return (sq == ""); });
+    string[] openSqs = game.board.filter(isolated function(string sq) returns boolean {
+        return (sq == "");
+    });
     log:printDebug(openSqs.length().toString() + " squares are open");
     return openSqs.length() == 0;
 
     // TODO: optimize this to detect when there's an open square on an unwinnable game
     // so the players don't have to go through the motions
 }
-isolated function makeMove(Game game, Move move) returns Game|error {
+
+function makeMove(Game game, Move move) returns Game|error {
     log:printInfo("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
 
     // Game must not be over

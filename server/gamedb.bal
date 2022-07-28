@@ -27,7 +27,6 @@ isolated class GameDB {
         log:printInfo("GameDB::insert");
 
         time:Utc createdAt = time:utcNow();
-
         sql:ParameterizedQuery query = `INSERT INTO Games (playerOne, playerTwo, board, playerToMove, createdAt)
              VALUES (${playerOne},${playerTwo}, ${INITIAL_BOARD}, ${playerOne}, ${createdAt})`;
         sql:ExecutionResult result = check self.jdbcClient->execute(query);
@@ -36,34 +35,32 @@ isolated class GameDB {
         return insertId is int ? insertId : -1;
     }
 
-  isolated  function game(int id) returns Game|error {
+    function game(int id) returns Game|error {
         log:printInfo("GameDB::game(" + id.toString() + ")");
         Game result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
         log:printDebug("result: " + value:toBalString(result));
         return result;
     }
 
-  isolated  function retrieve(string? clause = ()) returns Game[]|error {
+    function retrieve(string? clause = ()) returns Game[]|error {
         sql:ParameterizedQuery query = `SELECT * FROM Games`;
         if clause is string {
             query = `SELECT * FROM Games WHERE ${clause}`;
         }
-
         stream<Game, error?> results = self.jdbcClient->query(query);
-
         Game[]? games = check from Game game in results
             select game;
 
         return games is Game[] ? games : [];
     }
 
-    isolated function update(Game game) returns error? {
+    function update(Game game) returns error? {
         log:printInfo("GameDB::update(" + game.toString() + ")");
         sql:ParameterizedQuery query =
             `UPDATE Games SET playerToMove=${game.playerToMove}, 
              board = ${game.board} WHERE id = ${game.id}`;
         _ = check self.jdbcClient->execute(query);
-     }
+    }
 
     function delete(int id) returns error? {
         log:printInfo("GameDB::delete(" + id.toString() + ")");
