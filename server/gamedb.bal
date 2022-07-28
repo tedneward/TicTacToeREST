@@ -3,8 +3,8 @@ import ballerina/sql;
 import ballerina/time;
 import ballerinax/java.jdbc;
 
-class GameDB {
-    jdbc:Client jdbcClient;
+isolated class GameDB {
+    private final jdbc:Client jdbcClient;
 
     function init(string file) returns error? {
         self.jdbcClient = check new ("jdbc:h2:file:./" + file, "user", "pass");
@@ -24,10 +24,6 @@ class GameDB {
         log:printInfo("Initialization completed");
     }
 
-    function raw() returns jdbc:Client {
-        return self.jdbcClient;
-    }
-
     function insert(string playerOne, string playerTwo) returns int|error {
         log:printInfo("GameDB::insert");
 
@@ -39,17 +35,16 @@ class GameDB {
              VALUES (${playerOne},${playerTwo}, ${board}, ${playerOne}, ${createdAt})`;
         sql:ExecutionResult result = check self.jdbcClient->execute(query);
         log:printInfo("SQL RESULT: " + result.toString());
-        return <int>result.lastInsertId;
+        (int|string)? insertId = result.lastInsertId;
+        return insertId is int ? insertId : -1;
     }
 
-    function game(int id) returns Game|error {
+    isolated function game(int id) returns Game|error {
         log:printInfo("GameDB::game(" + id.toString() + ")");
-        Game|error result = check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
-        log:printError("result: ${result)");
-        return result;
+        return check self.jdbcClient->queryRow(`SELECT * FROM Games where id = ${id}`);
     }
 
-    function retrieve(string clause = "") returns Game[]|error {
+    isolated function retrieve(string clause = "") returns Game[]|error {
         sql:ParameterizedQuery query = `SELECT * FROM Games`;
         if clause.length() > 0 {
             query = `SELECT * FROM Games WHERE ${clause}`;
