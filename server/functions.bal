@@ -48,10 +48,8 @@ function checkCats(Game game) returns boolean|error {
     log:printInfo("Checking for cats game in game " + value:toString(game.id));
 
     // Brute-force method: if any space is open, it's not cats yet
-    //string[] board = check game.board.fromJsonStringWithType();
-    string[] openSqs = game.board.filter(isolated function(string sq) returns boolean {
-        return (sq == "");
-    });
+    string[] openSqs = game.board.filter((entry) => entry == "");
+    
     log:printDebug(openSqs.length().toString() + " squares are open");
     return openSqs.length() == 0;
 
@@ -64,23 +62,22 @@ function makeMove(Game game, Move move) returns Game|error {
 
     // Game must not be over
     if game.winner is string {
-        fail error("Game is completed; " + (game.winner ?: "") + " won.");
+        return error("Game is completed; " + (game.winner ?: "") + " won.");
     }
 
     string movePlayer = move.player;
     // It must be this player's turn
     if game.playerToMove is string && game.playerToMove != movePlayer {
-        fail error("Illegal move: Not your turn!");
+        return error("Illegal move: Not your turn!");
     }
 
     ///////////////////////
     // Process the move
     int boardPos = move.boardPosition;
 
-    //string[] board = check game.board.fromJsonStringWithType();
     // That position cannot already be occupied
     if game.board[boardPos] != "" {
-        fail error("Illegal move: Occupied space!");
+        return error("Illegal move: Occupied space!");
     }
 
     // Put the player in that given square
