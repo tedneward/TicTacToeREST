@@ -5,7 +5,7 @@ import ballerina/lang.value;
 listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
 service / on ep0 {
-    resource function get games() returns Game[]
+    isolated resource function get games() returns Game[]
     {
         log:printInfo("GET /games: ");
         Game[]|error games = getGames();
@@ -18,7 +18,7 @@ service / on ep0 {
             return games;
         }
     }
-    resource function get games/[int  id]() returns Game|http:NotFound 
+    isolated resource function get games/[int  id]() returns Game|http:NotFound 
     {
         log:printInfo("GET /games/{" + value:toString(id) + "}");
 
@@ -36,7 +36,7 @@ service / on ep0 {
             return game;
         }
     }
-    resource function post games(@http:Payload GamesBody payload) returns http:Created|http:BadRequest|http:MethodNotAllowed
+    isolated resource function post games(@http:Payload GamesBody payload) returns http:Created|http:BadRequest|http:MethodNotAllowed
     {
         log:printInfo("POST /games " + value:toBalString(payload) + ": ");
 
@@ -50,7 +50,8 @@ service / on ep0 {
             return <http:Created>{ body:game };
         }
     }
-    resource function post games/[int  id]/move(@http:Payload Move payload) returns Game|http:NotFound|http:BadRequest
+    resource function post games/[int id]/move(@http:Payload Move payload)
+        returns Game|http:NotFound|http:BadRequest
     {
         log:printInfo("POST /games/" + value:toString(id) + "/move " + value:toBalString(payload) + ": ");
 

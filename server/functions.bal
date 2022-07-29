@@ -3,17 +3,17 @@ import ballerina/log;
 
 final GameDB gamedb = check new GameDB("games");
 
-public function getGames() returns Game[]|error {
+isolated function getGames() returns Game[]|error {
     log:printInfo("getGames()");
     return check gamedb.retrieve();
 }
-public function getGame(int id) returns Game|error {
+isolated function getGame(int id) returns Game|error {
     log:printInfo("getGame(id:" + value:toString(id) + "): ");
     Game game = check gamedb.game(id);
     log:printInfo("    returns " + game.toString());
     return game;
 }
-public function createGame(string p1, string p2) returns Game|error {
+isolated function createGame(string p1, string p2) returns Game|error {
     log:printInfo("createGame(p1:" + p1 + ",p2:" + p2 + ")");
 
     // p1 is X and board always first to move; TODO randomize this
@@ -23,7 +23,7 @@ public function createGame(string p1, string p2) returns Game|error {
     log:printInfo("    returns " + result.toString());
     return result;
 }
-final int[][] WIN_PATTERNS = [
+final int[][] & readonly WIN_PATTERNS = [
     // Down
     [0, 3, 6],
     [1, 4, 7],
@@ -36,7 +36,7 @@ final int[][] WIN_PATTERNS = [
     [0, 4, 8],
     [2, 4, 6]
 ];
-function checkWinner(Game game, string player) returns boolean|error {
+isolated function checkWinner(Game game, string player) returns boolean|error {
     // Chiran's version, but it doesn't yield the same results as mine;
     // figure out why later. --TKN
     //
@@ -50,48 +50,38 @@ function checkWinner(Game game, string player) returns boolean|error {
     //    };
 
     log:printInfo("Checking for winner in game " + value:toString(game.id) + " for player " + player);
-
     foreach int[] pattern in WIN_PATTERNS {
-        log:printDebug("Checking pattern " + value:toBalString(pattern) + ": ");
-
-        boolean win = true;
-        pattern.forEach(function (int pos) {
-            if (game.board[pos] != player) {
-                win = false;
-            }
-        });
-        log:printDebug(win.toString());
-
-        if (win) {
-            log:printInfo(player + "WIN!");
+        log:printDebug("Checking pattern " + pattern.toBalString());
+        if (pattern.filter((pos) => game.board[pos] != player)).length() > 0 {
+            log:printInfo(player + " WIN!");
             return true;
         }
     }
     
     return false;
 }
-function checkCats(Game game) returns boolean|error { 
+isolated function checkCats(Game game) returns boolean|error { 
     log:printInfo("Checking for cats game in game " + value:toString(game.id));
 
     // Brute-force method: if any space is open, it's not cats yet
-    var openSqs = game.board.filter(function (string sq) returns boolean { return (sq == ""); });
+    string[] openSqs = game.board.filter((sq) => sq == "");
     log:printDebug(value:toString(openSqs.length()) + " squares are open");
     return openSqs.length() == 0;
 
     // TODO: optimize this to detect when there's an open square on an unwinnable game
     // so the players don't have to go through the motions
 }
-public function makeMove(Game game, Move move) returns Game|error {
+isolated function makeMove(Game game, Move move) returns Game|error {
     log:printInfo("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
 
     // Game must not be over
     if (game.winner is string) {
-        fail error("Game is completed; " + (game.winner ?: "") + " won.");
+        return error("Game is completed; " + (game.winner ?: "") + " won.");
     }
 
     // It must be this player's turn
     if (game.playerToMove is string && game.playerToMove != move.player) {
-        fail error("Illegal move: Not your turn!");
+        return error("Illegal move: Not your turn!");
     }
 
     ///////////////////////
@@ -100,7 +90,7 @@ public function makeMove(Game game, Move move) returns Game|error {
 
     // That position cannot already be occupied
     if (game.board[boardPos] != "") {
-        fail error("Illegal move: Occupied space!");
+        return error("Illegal move: Occupied space!");
     }
 
     // Put the player in that given square
