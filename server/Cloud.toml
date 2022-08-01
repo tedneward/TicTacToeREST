@@ -1,0 +1,8 @@
+[container.image]
+repository="tedneward" # ex - Docker hub name
+name="tictactoe" # container name
+tag="v1.0.0"
+
+[settings]
+buildImage=true 
+

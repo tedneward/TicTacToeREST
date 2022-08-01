@@ -1,4 +1,3 @@
-import ballerina/io;
 import ballerina/log;
 import ballerina/http;
 import ballerina/test;
@@ -18,6 +17,9 @@ function testServiceCreateGame() returns error? {
     http:Response response = 
         check testClient->post("/", message={ playerOne: "Wilma", playerTwo: "Betty" });
     test:assertEquals(response.statusCode, 201);
-    string payload = check response.getTextPayload();
-    io:println("Payload: " + payload);
+    string payloadStr = check response.getTextPayload();
+    json payload = check payloadStr.fromJsonString();
+    test:assertEquals(payload.playerOne, "Wilma");
+    test:assertEquals(payload.playerTwo, "Betty");
+    test:assertEquals(payload.board, ["", "", "", "", "", "", "", "", ""]);
 }
