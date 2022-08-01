@@ -6,6 +6,7 @@ version="1.0.0"
 
 [build-options]
 observabilityIncluded = true
+cloud = "docker"
 
 [[platform.java11.dependency]]
 groupId = "com.h2database"

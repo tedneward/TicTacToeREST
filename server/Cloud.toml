@@ -4,5 +4,5 @@ name="tictactoe" # container name
 tag="v1.0.0"
 
 [settings]
-buildImage=true 
+buildImage=true # set to false to generate Dockerfile
 

@@ -1,6 +1,11 @@
 import ballerina/http;
+import ballerina/io;
 import ballerina/log;
 import ballerina/lang.value;
+
+function init() {
+    io:println("Initializer firing; all setup complete");
+}
 
 listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
