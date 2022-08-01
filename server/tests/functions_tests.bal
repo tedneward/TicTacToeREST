@@ -1,4 +1,3 @@
-import ballerina/log;
 import ballerina/test;
 
 @test:Config {}
@@ -46,60 +45,118 @@ function functions_tryToMoveToOccupiedSpot() returns error? {
     test:assertTrue((<error>result).message() == "Illegal move: Occupied space!");
 }
 
-// test winners
 @test:Config {
-    dataProvider: winningMovesGen
+    dataProvider: winningBoards
 }
-function functions_checkWinners(int[] winningMoves) returns error? {
-    Game game = check createGame("Pebbles", "BamBam");
-    string currentPlayer = "";
-
-    foreach int move in winningMoves {
-        currentPlayer = game.playerToMove ?: "Problem, boss";
-        game = check makeMove(game, { player: currentPlayer, boardPosition: move });
-        log:printInfo(game.message);
-    }
-
-    test:assertEquals(game.winner, currentPlayer);
-    test:assertEquals(game.message, "Last move: " + currentPlayer + " takes square " + winningMoves[winningMoves.length() - 1].toString() + "; " + currentPlayer + " WINS!");
+function functions_checkWinners(string[] board) returns error? {
+    Game game = { id: -1, playerOne: "P1", playerTwo: "P2",
+        board: board,
+        message: ""
+    };
+    boolean result = check checkWinner(game.cloneReadOnly(), "P1");
+    test:assertTrue(result);
+    result = check checkWinner(game.cloneReadOnly(), "P2");
+    test:assertFalse(result);
 }
-function winningMovesGen() returns map<[int[]]>|error {
-    map<[int[]]> dataSet = {
-        "p1, across, top row": [[0, 3, 1, 7, 2]],
-        "p1, across, middle row": [[3, 0, 4, 1, 5]],  
-        "p1, across, bottom row": [[6, 3, 7, 1, 8]], 
-        "p1, down, far-left column": [[0, 1, 3, 2, 6]], 
-        "p1, down, center column": [[1, 2, 4, 5, 7]], 
-        "p1, down, far-right column": [[2, 3, 5, 6, 8]], 
-        "p1, diagonal \\": [[0, 1, 4, 2, 8]],
-        "p1, diagonal /": [[2, 0, 4, 1, 6]]
+
+function winningBoards() returns map<[string[]]>|error {
+    map<[string[]]> dataSet = {
+        "p1, across, top row": [
+            ["P1", "P1", "P1", 
+             "P2", "P2", "P1",
+             "P2", "P1", "P2"]
+        ],
+        "p1, across, middle row": [
+            ["P2", "P2", "P1", 
+             "P1", "P1", "P1",
+             "P2", "P1", "P2"]
+        ],  
+        "p1, across, bottom row": [
+            ["P2", "P1", "P2",
+             "P2", "P2", "P1",
+             "P1", "P1", "P1"]
+        ], 
+        "p1, down, far-left column": [
+            ["P1", "P2", "P2",
+             "P1", "P2", "P1",
+             "P1", "P1", "P2"]
+        ], 
+        "p1, down, center column": [
+            ["P2", "P1", "P2",
+             "P2", "P1", "P1",
+             "P1", "P1", "P2"]
+        ], 
+        "p1, down, far-right column": [
+            ["P2", "P2", "P1",
+             "P1", "P2", "P1",
+             "P2", "P1", "P1"]
+        ], 
+        "p1, diagonal slash": [
+            ["P1", "P2", "P2",
+             "P2", "P1", "P1",
+             "P2", "P1", "P1"]
+        ],
+        "p1, diagonal backslash": [
+            ["P2", "P2", "P1",
+             "P2", "P1", "P1",
+             "P1", "P1", "P2"]
+        ]
     };
     return dataSet;
 }
 
 // test cats
 @test:Config {
-    dataProvider: nowinnerMovesGen
+    dataProvider: drawBoards
 }
-function functions_checkCatsGames(int[] moves) returns error? {
-    Game game = check createGame("Pebbles", "BamBam");
-    string currentPlayer = "";
-
-    foreach int move in moves {
-        currentPlayer = game.playerToMove ?: "Problem, boss";
-        game = check makeMove(game, { player: currentPlayer, boardPosition: move });
-        log:printInfo(game.message);
-    }
-
-    test:assertEquals(game.winner, currentPlayer);
-    test:assertEquals(game.message, "Last move: " + currentPlayer + " takes square " + moves[moves.length() - 1].toString() + "; " + currentPlayer + " WINS!");
+function functions_checkCats(string[] board) returns error? {
+    Game game = { id: -1, playerOne: "P1", playerTwo: "P2",
+        board: board,
+        message: ""
+    };
+    boolean result = check checkWinner(game.cloneReadOnly(), "P1");
+    test:assertFalse(result);
+    result = check checkWinner(game.cloneReadOnly(), "P2");
+    test:assertFalse(result);
+    result = check checkCats(game);
+    test:assertTrue(result);
 }
-function nowinnerMovesGen() returns map<[int[]]>|error {
-    map<[int[]]> dataSet = {
-        "cats 1": [[0, 3, 6, 7, 2, 1, 8, 5, 4]]
-        //"cats 2": [[0, 1, 2, 3, 6, 8, 4, 7, 5]]
+function drawBoards() returns map<[string[]]>|error {
+    map<[string[]]> dataSet = {
+        "p1, across, top row": [
+            ["P1", "P2", "P1", 
+             "P2", "P2", "P1",
+             "P1", "P1", "P2"]
+        ]
     };
     return dataSet;
 }
+
+@test:Config {
+    dataProvider: stillOpenBoards
+}
+function functions_checkNoWinnerNoDraw(string[] board) returns error? {
+    Game game = { id: -1, playerOne: "P1", playerTwo: "P2",
+        board: board,
+        message: ""
+    };
+    boolean result = check checkWinner(game.cloneReadOnly(), "P1");
+    test:assertFalse(result);
+    result = check checkWinner(game.cloneReadOnly(), "P2");
+    test:assertFalse(result);
+    result = check checkCats(game);
+    test:assertFalse(result);
+}
+function stillOpenBoards() returns map<[string[]]>|error {
+    map<[string[]]> dataSet = {
+        "empty board": [
+            ["", "", "", 
+             "", "", "",
+             "", "", ""]
+        ]
+    };
+    return dataSet;
+}
+
 
 // TODO: test cats games before board is entirely filled
