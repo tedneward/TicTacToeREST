@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: n1hility/cancel-previous-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Change Version
+        run: |
+          sed -i -e 's/^version\=".*"/version="${{ github.event.inputs.version }}"/g' server/Ballerina.toml 
+          
+      - name: Build
+        uses: ballerina-platform/ballerina-action@2201.1.1
+        with:
+          args: build
+        env:
+          WORKING_DIR: server
+
+      - name: Commit Version
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Action"
+          git commit -a -m "Releasing version ${{ github.event.inputs.version }}"
+          git push origin main
+          
+      - name: Release
+        uses: jreleaser/release-action@v2
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ github.event.inputs.version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release output
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jreleaser-release
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
