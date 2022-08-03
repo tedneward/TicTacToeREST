@@ -1,2 +1,2 @@
 [ballerina.log]
-level = "WARN"
+level = "INFO"
