@@ -7,7 +7,7 @@ function init() {
     io:println("Initializer firing; all setup complete");
 }
 
-listener http:Listener ep0 = new (9090, config = {host: "localhost"});
+listener http:Listener ep0 = new (9090);
 
 service / on ep0 {
     isolated resource function get games() returns Game[]

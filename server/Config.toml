@@ -1,2 +1,6 @@
+username = "user"
+password = "pass"
+gamedbfile = "games"
+
 [ballerina.log]
 level = "INFO"

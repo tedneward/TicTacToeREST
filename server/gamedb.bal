@@ -10,6 +10,7 @@ isolated class GameDB {
     private final jdbc:Client jdbcClient;
 
     function init(string file) returns error? {
+        log:printInfo("GameDB::init opening database at ./" + file);
         self.jdbcClient = check new ("jdbc:h2:file:./" + file, username, password);
 
         // Turn on tracing

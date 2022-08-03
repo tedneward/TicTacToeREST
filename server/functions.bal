@@ -1,7 +1,8 @@
 import ballerina/lang.value;
 import ballerina/log;
 
-final GameDB gamedb = check new GameDB("games");
+configurable string gamedbfile = "games"; 
+final GameDB gamedb = check new GameDB(gamedbfile);
 
 isolated function getGames() returns Game[]|error {
     log:printInfo("getGames()");

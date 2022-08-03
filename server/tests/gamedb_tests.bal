@@ -1,11 +1,12 @@
 //import ballerina/log;
 import ballerina/test;
 
-GameDB db = check new GameDB("target/gamedb");
+GameDB db = check new GameDB("target/cache/testdb");
 
 @test:BeforeEach
 function newGamedb() returns error? {
-    db = check new GameDB("target/gamedb");
+    check db.close();
+    db = check new GameDB("target/cache/testdb");
 }
 
 @test:AfterEach
