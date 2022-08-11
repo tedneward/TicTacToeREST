@@ -9,7 +9,10 @@ function init() {
 
 listener http:Listener ep0 = new (9090);
 
+# The (singular) service for this TicTacToe implementation
 service / on ep0 {
+    # Return a list of all the games already in the database
+    # + return - the complete database, warning this could be a lot of data!
     isolated resource function get games() returns Game[]
     {
         log:printInfo("GET /games: ");
@@ -23,6 +26,11 @@ service / on ep0 {
             return games;
         }
     }
+    # Return a particular game from the database
+    # identified by its unique identifier.
+    # (Games can be purged and ids reused, just FYI.)
+    # + id - the id of the game to retrieve
+    # + return - either the Game data, or a NotFound (404) if that ID isn't found in the database
     isolated resource function get games/[int  id]() returns Game|http:NotFound 
     {
         log:printInfo("GET /games/{" + value:toString(id) + "}");
@@ -41,6 +49,12 @@ service / on ep0 {
             return game;
         }
     }
+    # Put new game into the database by providing the basics
+    # (that is, two players' names, in the respective P1 and P2
+    # spots in the Game payload). The rest of the Game data will
+    # be filled in.
+    # + payload - the GameBody payload to update, assuming only P1 and P2 are filled in
+    # + return - either a Created (201) if all is good, or a BadRequest(400) or MethodNotAllowed (4xx) depending on what is wrong
     isolated resource function post games(@http:Payload GamesBody payload) returns http:Created|http:BadRequest|http:MethodNotAllowed
     {
         log:printInfo("POST /games " + value:toBalString(payload) + ": ");
@@ -55,6 +69,13 @@ service / on ep0 {
             return <http:Created>{ body:game };
         }
     }
+    # Play a move on a particular game; this will trigger enforcement of all
+    # game logic, so that games cannot be (easily) cheated. Results will be 
+    # updated in the database and a Game object returned, with the 'message'
+    # element describing what just happened.
+    # + id - the Game to post the move to
+    # + payload - the move that is being played
+    # + return - the Game if the move is accepted, a NotFound (404) if that ID isn't recongized, or a BadRequest (400) if that's an illegal move somehow
     resource function post games/[int id]/move(@http:Payload Move payload)
         returns Game|http:NotFound|http:BadRequest
     {

@@ -4,20 +4,29 @@ import ballerina/log;
 configurable string gamedbfile = "games"; 
 final GameDB gamedb = check new GameDB(gamedbfile);
 
+# getGames()
+# + return - a list of all the games from the database
 isolated function getGames() returns Game[]|error {
     log:printInfo("getGames()");
     return check gamedb.retrieve();
 }
+# getGame()
+# + id - the identifier of the Game we wish to retrieve
+# + return - the Game found
 isolated function getGame(int id) returns Game|error {
     log:printInfo("getGame(id:" + value:toString(id) + "): ");
     Game game = check gamedb.game(id);
     log:printInfo("    returns " + game.toString());
     return game;
 }
+# createGame()
+# + p1 - player one for the game
+# + p2 - player two for the game
+# + return - the (now-stored in the database) Game record for this game
 isolated function createGame(string p1, string p2) returns Game|error {
     log:printInfo("createGame(p1:" + p1 + ",p2:" + p2 + ")");
 
-    // p1 is X and board always first to move; TODO randomize this
+    // p1 is always first to move; TODO randomize this
 
     int id = check gamedb.insert(p1, p2);
     Game result = check gamedb.game(id);
@@ -37,6 +46,10 @@ final int[][] & readonly WIN_PATTERNS = [
     [0, 4, 8],
     [2, 4, 6]
 ];
+# Check if there's a winner
+# + game - the game instance whose board we are examining
+# + player - the player whose cells we are checking for victory
+# + return - boolean true/false for that player's victory
 isolated function checkWinner(Game & readonly game, string player) returns boolean|error {
     log:printInfo("Checking for winner in game " + value:toString(game.id) + " for player " + player);
     foreach int[] pattern in WIN_PATTERNS {
@@ -50,6 +63,9 @@ isolated function checkWinner(Game & readonly game, string player) returns boole
     log:printDebug(player + " no win");
     return false;
 }
+# Check if this is a tie ("cats") game
+# + game - the game instance whose board we are examining
+# + return - true/false whether this game is tied; note at this point it is a dumb check, and will false out if there is any empty squares
 isolated function checkCats(Game game) returns boolean|error { 
     log:printInfo("Checking for cats game in game " + value:toString(game.id));
 
@@ -65,6 +81,10 @@ isolated function checkCats(Game game) returns boolean|error {
     // Thought: go through win patterns, this time checking for == player AND == ""
     // In other words, check for possible winners; if there is one, it's not a cats game
 }
+# (Attempt to) Make a move on the board
+# + game - the game instance against which we are making the move
+# + move - the player/cell combo that comprises the move
+# + return - the updated Game instance, or an error if the move is illegal
 isolated function makeMove(Game game, Move move) returns Game|error {
     log:printInfo("makeMove(game:" + value:toBalString(game) + ", move:" + value:toBalString(move) + ")");
 
