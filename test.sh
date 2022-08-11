@@ -2,16 +2,12 @@ echo Get list of all games ---------------------------
 curl http://localhost:9090/games
 echo .
 
-echo Get the default game ----------------------------
-curl http://localhost:9090/games/0
-echo .
-
 echo Create a game ----------------------
 curl -d '{"playerOne":"Wilma","playerTwo":"Betty"}' -H 'Content-Type: application/json' http://localhost:9090/games
 echo .
 
 echo Get that just-created game -------------------------------
-curl http://localhost:9090/games/1
+curl http://localhost:9090/games/0
 echo .
 
 echo Wilma goes center-square ----------------------------
@@ -24,10 +20,6 @@ echo .
 
 echo Betty goes upper-left ----------------------------
 curl -d '{"player":"Betty","boardPosition":0}' -H 'Content-Type: application/json' http://localhost:9090/games/1/move
-echo .
-
-echo Betty tries to go again to upper-right ----------------------------
-curl -d '{"player":"Betty","boardPosition":2}' -H 'Content-Type: application/json' http://localhost:9090/games/1/move
 echo .
 
 echo Wilma goes top-center ----------------------------
