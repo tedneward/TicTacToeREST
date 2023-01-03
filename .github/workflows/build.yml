@@ -1,0 +1,19 @@
+name: Build
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+    
+      - name: Build
+        uses: ballerina-platform/ballerina-action@2201.1.1
+        with:
+          args: build
+        env:
+          WORKING_DIR: server

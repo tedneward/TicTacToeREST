@@ -1,0 +1,19 @@
+project:
+  name: tictactoe
+  description: REST server for a game of tic-tac-toe, also known in the UK as "naughts and crosses".
+  website: https://github.com/tedneward/TicTacToeREST
+  authors:
+    - Ted Neward
+  license: BSD-3-Clause
+  extraProperties:
+    inceptionYear: 2022
+
+release:
+  github:
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      format: '- {{commitShortHash}} {{commitTitle}}'
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'

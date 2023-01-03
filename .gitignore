@@ -26,3 +26,6 @@ target
 hs_err_pid*
 
 **/*.mv.db
+
+# JReleaser output
+out
